@@ -35,7 +35,7 @@
                                                   :target-path "target-js" } ] ]
              :silent false
              :verbose false}
-  :profile { }
+  :profiles { }
   :clean-targets ^{:protect false} [
                                     "target-js/" 
                                     :target-path]

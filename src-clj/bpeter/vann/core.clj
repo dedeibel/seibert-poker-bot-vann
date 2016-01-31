@@ -1,6 +1,7 @@
 (ns bpeter.vann.core
   (:require
     [bpeter.vann.game :as g]
+    [bpeter.vann.system :as sys]
     [aleph.http :as http]
     [manifold.deferred :as d]
     [manifold.stream :as s]
@@ -9,13 +10,13 @@
 
 (defn connect [url]
   (let [connection @(http/websocket-client url)]
-    (println "started connection" connection)
+    (sys/log "started connection" connection)
     connection))
 
 (defn stop [connection]
-  (println "stopping - closing connection")
+  (sys/log "stopping - closing connection")
   (s/close! connection)
-  (println "closed")
+  (sys/log "closed")
   connection)
 
 (defn response-ok? [response]
@@ -25,12 +26,12 @@
   (str "p" table "\n" player-name "\n" pass))
 
 (defn sign-up [connection table player-name pass]
-  (println "signing up")
+  (sys/log "signing up")
   (s/put! connection (sign-up-message table player-name pass)))
 
 (def print-exception-fn 
   (fn [ex]
-    (println "ERROR: " ex)
+    (sys/log "ERROR: " ex)
     nil))
 
 (defn action [data]
@@ -49,25 +50,25 @@
             (when result
               (d/recur)))
           (if (s/closed? connection)
-            (println "connection closed, exiting mainloop")
+            (sys/log "connection closed, exiting mainloop")
             (do
-              (println "msg empty, sleeping")
+              (sys/log "msg empty, sleeping")
               (Thread/sleep 200)
               (d/recur)))))
       (d/catch print-exception-fn))))
 
 (defn enter-mainloop-if-response-is-ok [connection]
-  (println "entering mainloop")
+  (sys/log "entering mainloop")
   (if (response-ok? @(s/take! connection))
     @(mainloop connection)
-    (println "response negative, could not register with server")))
+    (sys/log "response negative, could not register with server")))
 
 (defn defconvar [connection]
   (def con connection)
   connection)
 
 (defn play [url table player-name pass] 
-  (println "starting")
+  (sys/log "starting")
   (doto (connect url)
     defconvar
     (sign-up table player-name pass)
@@ -78,14 +79,14 @@
   (play url table player-name pass))
 
 (defn replstart [& args]
-  (println "replstart")
+  (sys/log "replstart")
   (future 
     (play 
       "ws://localhost:8080"
       "f546402fX020dXd55fXbb75Xda327935a146"
       "Vann"
       "TR8T0R")
-    (println "replstop")))
+    (sys/log "replstop")))
 
 #_(replstart)
 #_(s/close! con)

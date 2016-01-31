@@ -1,60 +1,14 @@
-(ns bpeter.vann.game)
-
-(def PREFIX "Vann:")
-
-#?(:clj
-  (defn log [& args]
-    (apply println args))
-  :cljs
-  ; TODO fix .log apply problem and use (str a)
-  (defn log
-    ([a]      (.log js/console PREFIX a))
-    ([a b]    (.log js/console PREFIX a b))
-    ([a b c]  (.log js/console PREFIX a b c))
-    ([a b c d]  (.log js/console PREFIX a b c d))))
-
-(defn rank-symbol-to-number [rank-symbol-str]
-  (case rank-symbol-str
-    "J" 11
-    "Q" 12
-    "K" 13
-    "A" 14))
-
-(defn parse-int [string]
-  #?(:clj
-      (try
-        (Integer/parseInt string)
-        (catch NumberFormatException e
-          nil))
-      :cljs
-      (let [number (js/parseInt string)]
-        (if (js/isNaN number)
-          nil
-          number))))
-
-(defn parse-rank [string]
-  (let [rank-str (apply str (butlast string))
-        num (parse-int rank-str)]
-    (if (nil? num)
-      (rank-symbol-to-number rank-str)
-      num)))
-
-(defn parse-suit [string]
-  (case (first (reverse string))
-    \u2660 :spades
-    \u2665 :hearts
-    \u2666 :diamonds
-    \u2663 :clubs))
-
-(defn parse-card-string [string]
-  {
-   :rank (parse-rank string)
-   :suit (parse-suit string)
-   })
+(ns bpeter.vann.game
+  (:require [bpeter.vann.card   :as c]
+            [bpeter.vann.system :as sys]))
 
 (defn count? [n]
   (fn [col]
     (= n (count col))))
+
+(defn in? 
+  [col elm]  
+  (some #(= elm %) col))
 
 (defn group-hand-by-rank [hand]
   (vals (group-by :rank hand)))
@@ -76,10 +30,10 @@
        (apply max 0)))
 
 (defn hand [state]
-  (map parse-card-string (get state "Hand")))
+  (map c/parse-card-string (get state "Hand")))
 
 (defn table [state]
-  (map parse-card-string (get state "Tisch")))
+  (map c/parse-card-string (get state "Tisch")))
 
 (defn combined [state]
   (into (hand state) (table state)))
@@ -110,13 +64,19 @@
        sort
        last))
 
+(defn add-ace-as-one [ranklist]
+  (if (in? ranklist 14)
+    (cons 1 ranklist)
+    ranklist))
+
 (defn straight? [combined]
   (->> combined
        (map :rank)
+       add-ace-as-one
        sort
        continous-sequences
        max-coll-length
-       (< 5)))
+       (<= 5)))
 
 (defn round [state]
   (get state "Rundenname"))
@@ -129,14 +89,8 @@
     "river" 16
     "showdown" 17))
 
-(defn import-state [input-state]
-  #?(:clj
-    input-state
-    :cljs
-    (js->clj input-state)))
-
 (defn ^:export play [input-state]
-  (let [state (import-state input-state)
+  (let [state (sys/import-from-system-datastructure input-state)
         hand (hand state)
         combined-hand (combined state)
         table (table state)

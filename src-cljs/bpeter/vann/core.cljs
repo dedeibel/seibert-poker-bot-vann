@@ -1,11 +1,6 @@
 (ns bpeter.vann.core
-  (:require [bpeter.vann.game :as g]))
-
-(def PREFIX "Vann:")
-(defn log
-  ([a]      (.log js/console PREFIX a))
-  ([a b]    (.log js/console PREFIX a b))
-  ([a b c]  (.log js/console PREFIX a b c)))
+  (:require [bpeter.vann.game :as g]
+            [bpeter.vann.system :as sys]))
 
 (defn parseJSON [x]
   (js->clj (.parse (.-JSON js/window) x)))
@@ -27,7 +22,7 @@
   (str "p" (:table clientdata) "\n" (:player-name clientdata) "\n" (:pass clientdata)))
 
 (defn sign-up [clientdata]
-  (log "signing up")
+  (sys/log "signing up")
   (sendm (sign-up-message clientdata)))
 
 (defn handle-action [data]
@@ -41,9 +36,9 @@
 (defn handle-setup-response [data]
   (if (response-ok? data)
     (do
-      (log "signed up successfully")
+      (sys/log "signed up successfully")
       (reset! handle-data handle-action))
-    (log "negative sign-up response:" (subs data 1))))
+    (sys/log "negative sign-up response:" (subs data 1))))
 
 (def handle-data (atom handle-setup-response))
 
@@ -51,11 +46,11 @@
   (doall
     (map #(aset @websocket* (first %) (second %))
          [["onopen" (fn [] 
-                      (log "socket open")
+                      (sys/log "socket open")
                       (sign-up @clientdata)
                       )]
-          ["onclose" (fn [] (log "socket closed"))]
-          ["onerror" (fn [e] (log (str "socket error" e)))]
+          ["onclose" (fn [] (sys/log "socket closed"))]
+          ["onerror" (fn [e] (sys/log (str "socket error" e)))]
           ["onmessage" (fn [m]
                            (@handle-data (.-data m))
                            )]]))
@@ -63,10 +58,10 @@
              (fn []
                (.close @websocket*)
                (reset! @websocket* nil)))
-  (log "websocket initialized"))
+  (sys/log "websocket initialized"))
 
 (defn ^:export main [url table player-name pass] 
-  (log "starting to play:" (str url " " table " " player-name " " pass))
+  (sys/log "starting to play:" (str url " " table " " player-name " " pass))
   (reset! clientdata {:table table :player-name player-name :pass pass})
   (connect url)
   (mainloop))
