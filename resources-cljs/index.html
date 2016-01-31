@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Vann - Seibert Media Casino Pokerbot</title>
+</head>
+<body>
+<script src="vann.js"></script>
+<h1>Vann - Seibert Media Casino Pokerbot</h1>
+<form>
+  URL: <input type="text" name="url" value="ws://localhost:8080"><br/>
+  Tisch: <input type="text" name="table" value="5a7f8228Xfee3Xa426X60d8X7f8f074d65c9"><br/>
+  Spielername: <input type="text" name="name" value="Vann"><br/>
+  Passwort: <input type="text" name="password" value="TR8T0R"><br/>
+  <button name="submit" type="submit">Connect</button><br/>
+  <i>(Konsole öffnen)</i>
+</form>
+<script>
+  var form = document.querySelector("form");
+  form.addEventListener("submit", function(evt){
+     evt.preventDefault();
+     var url = form.elements['url'].value;
+     var table = form.elements['table'].value;
+     var name = form.elements['name'].value;
+     var pass = form.elements['password'].value;
+     if (! (url && table && name && pass)) {
+       return;
+     }
+
+     form.elements['submit'].disabled = true;
+     window.setTimeout(function() {
+       form.elements['submit'].disabled = false;
+     }, 3000);
+
+     bpeter.vann.core.main(url, table, name, pass)
+  });
+</script>
+</body>
+</html>
