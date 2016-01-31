@@ -1,12 +1,12 @@
 "use strict";
 
 /*
- *
  * Nutze diese Datei um den Bot in das Seibert Media Casino zu integrieren.
+ *
+ * Bot Quellen: https://github.com/dedeibel/seibert-poker-bot-vann
  *
  * Kopiere vann.js und Vanbot.js nach "casino/htdocs/src/PokerBot" im Casino
  * Projekt.
- *
  */
 
 Vann.prototype = new PokerBotBase();
