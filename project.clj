@@ -23,7 +23,7 @@
                            :output-to "target-js/vann.js"
                            :output-dir "target-js/vann"
                            :asset-path "./vann"
-                           :optimizations :simple
+                           :optimizations :advanced
                            :source-map "target-js/vann.js.map"
                            :pretty-print false
                            ;:optimizations :advanced
