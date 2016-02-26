@@ -1,31 +1,24 @@
 (ns bpeter.vann.game
   (:require [bpeter.vann.card   :as c]
+            [bpeter.collection  :as col]
             [bpeter.vann.system :as sys]))
 
-(defn count? [n]
-  (fn [col]
-    (= n (count col))))
-
-(defn in? 
-  [col elm]  
-  (some #(= elm %) col))
-
-(defn group-hand-by-rank [hand]
+(defn group-by-rank [hand]
   (vals (group-by :rank hand)))
 
 (defn pair? [hand]
   (->> hand
-       group-hand-by-rank
-       (some (count? 2))))
+       group-by-rank
+       (some (col/count? 2))))
 
 (defn at-least-same-ranks? [hand n]
   (->> hand
-       group-hand-by-rank
+       group-by-rank
        (some #(>= (count %) n))))
 
 (defn count-same-rank [hand]
   (->> hand
-       group-hand-by-rank
+       group-by-rank
        (map count)
        (apply max 0)))
 
@@ -49,23 +42,8 @@
     #(>= (count %) 5)
     (vals (group-by :suit combined))))
 
-; col must be sorted
-(defn continous-sequences [col]
-  (loop [col col cur [(first col)] all []]
-    (if (> (count col) 1)
-      (if (= (inc (first col)) (second col))
-        (recur (rest col) (conj cur (second col)) all)
-        (recur (rest col) [(second col)] (conj all cur)))
-      (conj all cur))))
-
-(defn max-coll-length [col-of-cols]
-  (->> col-of-cols
-       (map count)
-       sort
-       last))
-
 (defn add-ace-as-one [ranklist]
-  (if (in? ranklist 14)
+  (if (col/in? c/ace ranklist)
     (cons 1 ranklist)
     ranklist))
 
@@ -74,8 +52,8 @@
        (map :rank)
        add-ace-as-one
        sort
-       continous-sequences
-       max-coll-length
+       col/continous-sequences
+       col/count-max-col-length
        (<= 5)))
 
 (defn round [state]

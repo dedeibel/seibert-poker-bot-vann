@@ -13,8 +13,13 @@
   :aot [bpeter.vann.core]
   :plugins [[lein-cljsbuild "1.1.2"]
             [lein-resource "15.10.2"]]
-  :hooks [leiningen.resource
-          leiningen.cljsbuild]
+  :aliases {"standalone" [ "do"
+                          ["clean"]
+                          ["uberjar"]] 
+            "web" [ "do"
+                   ["clean"]
+                   ["resource"]
+                   ["cljsbuild" "once"]] }
   :cljsbuild {:builds
               [{:id "vann"
                 :source-paths ["src-common" "src-cljs"]

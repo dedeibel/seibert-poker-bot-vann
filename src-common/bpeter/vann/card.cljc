@@ -1,18 +1,22 @@
 (ns bpeter.vann.card
-  (:require [bpeter.vann.system :as s]))
+  (:require [bpeter.vann.system :as sys]))
 
 (def spades   \u2660)
 (def hearts   \u2665)
 (def diamonds \u2666)
 (def clubs    \u2663)
 
+(def jack 11)
+(def queen 12)
+(def king 13)
+(def ace 14)
+
 (defn parse-suit [string]
-  (case (first (reverse string))
+  (case (last string)
     \u2660 :spades
     \u2665 :hearts
     \u2666 :diamonds
     \u2663 :clubs))
-
 
 (defn ofspades   [rank] (str rank spades))
 (defn ofhearts   [rank] (str rank hearts))
@@ -26,9 +30,12 @@
     "K" 13
     "A" 14))
 
+(defn butlast-str [string]
+  (subs string 0 (dec (count string))))
+
 (defn parse-rank [string]
-  (let [rank-str (apply str (butlast string))
-        num (s/parse-int rank-str)]
+  (let [rank-str (butlast-str string)
+        num (sys/parse-int rank-str)]
     (if (nil? num)
       (rank-symbol-to-number rank-str)
       num)))
